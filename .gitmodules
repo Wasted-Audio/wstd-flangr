@@ -1,0 +1,9 @@
+[submodule "heavylib"]
+	path = heavylib
+	url = git@github.com:Wasted-Audio/heavylib.git
+[submodule "DPF"]
+	path = dpf
+	url = git@github.com:DISTRHO/DPF.git
+[submodule "DPF-Widgets"]
+	path = dpf-widgets
+	url = git@github.com:Wasted-Audio/DPF-Widgets.git
