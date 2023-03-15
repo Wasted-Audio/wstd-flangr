@@ -109,6 +109,15 @@ protected:
         ImFont* defaultFont = ImGui::GetFont();
         ImFont* titleBarFont = io.Fonts->Fonts[2];
 
+        auto IntensityActive = ImColor::HSV(0.03f / 3.6f, 0.76f, 0.74f);
+        auto IntensityHovered = ImColor::HSV(0.03f / 3.6f, 0.76f, 0.84f);
+        auto SpeedActive = ImColor::HSV(1.6f / 3.6f, 0.77f, 0.64f);
+        auto SpeedHovered = ImColor::HSV(1.6f / 3.6f, 0.77f, 0.74f);
+        auto FeedbackActive = ImColor::HSV(2.04f / 3.6f, 0.83f, 0.64f);
+        auto FeedbackHovered = ImColor::HSV(2.04f / 3.6f, 0.83f, 0.84f);
+        auto MixActive = ImColor::HSV(0.47f / 3.6f, 0.75f, 0.64f);
+        auto MixHovered = ImColor::HSV(0.47f / 3.6f, 0.75f, 0.84f);
+
         ImGui::PushFont(titleBarFont);
         if (ImGui::Begin("WSTD FLANGR", nullptr, ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse))
         {
@@ -118,8 +127,8 @@ protected:
             auto ImGuiKnob_FlagsDB = ImGuiKnob_Flags + ImGuiKnobFlags_dB;
             auto ImGuiKnob_FlagsLog = ImGuiKnob_Flags + ImGuiKnobFlags_Logarithmic;
 
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)ImColor::HSV(0.03f / 3.6f, 0.76f, 0.74f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)ImColor::HSV(0.03f / 3.6f, 0.76f, 0.84f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)IntensityActive);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)IntensityHovered);
             if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, 100, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
@@ -131,12 +140,11 @@ protected:
                 }
                 setParameterValue(1, fintensity);
             }
+            ImGui::PopStyleColor(2);
             ImGui::SameLine();
-            ImGui::PopStyleColor();
-            ImGui::PopStyleColor();
 
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)ImColor::HSV(1.6f / 3.6f, 0.77f, 0.64f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)ImColor::HSV(1.6f / 3.6f, 0.77f, 0.74f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)SpeedActive);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
             if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, 0.05f, "%.1fHz", ImGuiKnobVariant_SteppedTick, 100, ImGuiKnob_Flags, 21))
             {
                 if (ImGui::IsItemActivated())
@@ -148,12 +156,11 @@ protected:
                 }
                 setParameterValue(3, fspeed);
             }
+            ImGui::PopStyleColor(2);
             ImGui::SameLine();
-            ImGui::PopStyleColor();
-            ImGui::PopStyleColor();
 
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)ImColor::HSV(2.04f / 3.6f, 0.83f, 0.64f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)ImColor::HSV(2.04f / 3.6f, 0.83f, 0.84f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)FeedbackActive);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)FeedbackHovered);
             if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SpaceBipolar, 100, ImGuiKnob_Flags))
             {
                 if (ImGui::IsItemActivated())
@@ -165,13 +172,12 @@ protected:
                 }
                 setParameterValue(0, ffeedback);
             }
+            ImGui::PopStyleColor(2);
             ImGui::SameLine();
-            ImGui::PopStyleColor();
-            ImGui::PopStyleColor();
 
 
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)ImColor::HSV(0.47f / 3.6f, 0.75f, 0.64f));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)ImColor::HSV(0.47f / 3.6f, 0.75f, 0.84f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)MixActive);
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)MixHovered);
             if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, 100, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
@@ -183,10 +189,8 @@ protected:
                 }
                 setParameterValue(2, fmix);
             }
+            ImGui::PopStyleColor(2);
             ImGui::SameLine();
-
-            ImGui::PopStyleColor();
-            ImGui::PopStyleColor();
 
             if (ImGui::IsItemDeactivated())
             {
