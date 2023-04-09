@@ -5,6 +5,7 @@
 #include "DistrhoUI.hpp"
 #include "ResizeHandle.hpp"
 #include "veramobd.hpp"
+#include "wstdcolors.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -109,14 +110,16 @@ protected:
         ImFont* defaultFont = ImGui::GetFont();
         ImFont* titleBarFont = io.Fonts->Fonts[2];
 
-        auto IntensityActive = ImColor::HSV(0.03f / 3.6f, 0.76f, 0.74f);
-        auto IntensityHovered = ImColor::HSV(0.03f / 3.6f, 0.76f, 0.84f);
-        auto SpeedActive = ImColor::HSV(1.6f / 3.6f, 0.77f, 0.64f);
-        auto SpeedHovered = ImColor::HSV(1.6f / 3.6f, 0.77f, 0.74f);
-        auto FeedbackActive = ImColor::HSV(2.04f / 3.6f, 0.83f, 0.64f);
-        auto FeedbackHovered = ImColor::HSV(2.04f / 3.6f, 0.83f, 0.84f);
-        auto MixActive = ImColor::HSV(0.47f / 3.6f, 0.75f, 0.64f);
-        auto MixHovered = ImColor::HSV(0.47f / 3.6f, 0.75f, 0.84f);
+        auto intense = (fintensity - 20.0f) / 5.0f;
+
+        auto IntensityActive = ColorBright(Red, intense);
+        auto IntensityHovered = ColorBright(RedBr, intense);
+        auto SpeedActive = ColorBright(Green, intense);
+        auto SpeedHovered = ColorBright(GreenBr, intense);
+        auto FeedbackActive = ColorBright(Blue, intense);
+        auto FeedbackHovered = ColorBright(BlueBr, intense);
+        auto MixActive = ColorMix(SpeedActive, Yellow, intense, fmix);
+        auto MixHovered = ColorMix(SpeedHovered, YellowBr, intense, fmix);
 
         ImGui::PushFont(titleBarFont);
         if (ImGui::Begin("WSTD FLANGR", nullptr, ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse))

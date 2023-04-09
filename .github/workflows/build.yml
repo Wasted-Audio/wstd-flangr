@@ -4,7 +4,7 @@ on:
   push:
 
 env:
-  HVCC_VERSION: f9861c264ea6a4db90d8c65e2360140a2918198e
+  HVCC_VERSION: 82c5c3971eb77c8b508e3256abe00083662bf538
 
 jobs:
   linux-x86_64:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build plugins
         run: |
-          hvcc wstd-flangr.pd -n WSTD_FLANGR -m wstd-flangr.json -o WSTD_FLANGR -g dpf -p heavylib/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
+          hvcc wstd-flangr.pd -n WSTD_FLANGR -m wstd-flangr.json -o WSTD_FLANGR -g dpf -p dep/heavylib/ dep/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
           cp override/* WSTD_FLANGR/plugin/source/
           make -C WSTD_FLANGR WITH_LTO=true -j $(nproc)
 
@@ -85,7 +85,7 @@ jobs:
           PKG_CONFIG: "false"
           WINEDEBUG: "-all"
         run: |
-          hvcc wstd-flangr.pd -n WSTD_FLANGR -m wstd-flangr.json -o WSTD_FLANGR -g dpf -p heavylib/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
+          hvcc wstd-flangr.pd -n WSTD_FLANGR -m wstd-flangr.json -o WSTD_FLANGR -g dpf -p dep/heavylib/ dep/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
           cp override/* WSTD_FLANGR/plugin/source/
           make -C WSTD_FLANGR WITH_LTO=true -j $(nproc)
 
@@ -137,11 +137,11 @@ jobs:
           CXXFLAGS: -arch x86_64 -arch arm64 -DMAC_OS_X_VERSION_MAX_ALLOWED=MAC_OS_X_VERSION_10_12 -mmacosx-version-min=10.12 -mtune=generic -msse -msse2
           LDFLAGS: -arch x86_64 -arch arm64 -mmacosx-version-min=10.12
         run: |
-          hvcc wstd-flangr.pd -n WSTD_FLANGR -m wstd-flangr.json -o WSTD_FLANGR -g dpf -p heavylib/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
+          hvcc wstd-flangr.pd -n WSTD_FLANGR -m wstd-flangr.json -o WSTD_FLANGR -g dpf -p dep/heavylib/ dep/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
           cp override/* WSTD_FLANGR/plugin/source/
           make -C WSTD_FLANGR NOOPT=true WITH_LTO=true -j $(sysctl -n hw.logicalcpu)
           cd WSTD_FLANGR
-          ../dpf/utils/package-osx-bundles.sh
+          ../dep/dpf/utils/package-osx-bundles.sh
 
       - name: Set sha8 (non-release)
         if: startsWith(github.ref, 'refs/tags/') != true
