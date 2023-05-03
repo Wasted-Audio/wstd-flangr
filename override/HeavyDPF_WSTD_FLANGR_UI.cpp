@@ -28,7 +28,7 @@ public:
       The UI should be initialized to a default state that matches the plugin side.
     */
     ImGuiPluginUI()
-        : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT),
+        : UI(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT, true),
           fResizeHandle(this)
     {
         setGeometryConstraints(DISTRHO_UI_DEFAULT_WIDTH, DISTRHO_UI_DEFAULT_HEIGHT, true);
@@ -41,8 +41,8 @@ public:
         fc.OversampleV = 1;
         fc.PixelSnapH = true;
 
-        io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 16.0f, &fc);
-        io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 21.0f, &fc);
+        io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 16.0f * getScaleFactor(), &fc);
+        io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 21.0f * getScaleFactor(), &fc);
         io.Fonts->Build();
         io.FontDefault = io.Fonts->Fonts[1];
 
@@ -121,10 +121,13 @@ protected:
         auto MixActive = ColorMix(SpeedActive, Yellow, intense, fmix);
         auto MixHovered = ColorMix(SpeedHovered, YellowBr, intense, fmix);
 
+        const float hundred = 100 * getScaleFactor();
+
+
         ImGui::PushFont(titleBarFont);
         if (ImGui::Begin("WSTD FLANGR", nullptr, ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse))
         {
-            ImGui::Dummy(ImVec2(0.0f, 8.0f));
+            ImGui::Dummy(ImVec2(0.0f, 8.0f * getScaleFactor()));
             ImGui::PushFont(defaultFont);
             auto ImGuiKnob_Flags = ImGuiKnobFlags_DoubleClickReset + ImGuiKnobFlags_ValueTooltip + ImGuiKnobFlags_NoInput + ImGuiKnobFlags_ValueTooltipHideOnClick;
             auto ImGuiKnob_FlagsDB = ImGuiKnob_Flags + ImGuiKnobFlags_dB;
@@ -132,7 +135,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)IntensityActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)IntensityHovered);
-            if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, 100, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -148,7 +151,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)SpeedActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
-            if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, 0.05f, "%.1fHz", ImGuiKnobVariant_SteppedTick, 100, ImGuiKnob_Flags, 21))
+            if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, 0.05f, "%.1fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 21))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -164,7 +167,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)FeedbackActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)FeedbackHovered);
-            if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SpaceBipolar, 100, ImGuiKnob_Flags))
+            if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SpaceBipolar, hundred, ImGuiKnob_Flags))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -178,10 +181,9 @@ protected:
             ImGui::PopStyleColor(2);
             ImGui::SameLine();
 
-
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)MixActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)MixHovered);
-            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, 100, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
