@@ -151,7 +151,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)SpeedActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
-            if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, 0.05f, "%.1fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 21))
+            if (ImGuiKnobs::Knob("Speed", &fspeed, 0.01f, 20.0f, 0.01f, "%.2fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_FlagsLog, 21))
             {
                 if (ImGui::IsItemActivated())
                 {
