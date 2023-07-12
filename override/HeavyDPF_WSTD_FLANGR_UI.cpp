@@ -16,7 +16,7 @@ class ImGuiPluginUI : public UI
     float ffeedback = 0.0f;
     float fintensity = 20.0f;
     float fmix = 50.0f;
-    float fspeed = 20.0f;
+    float fspeed = 2.0f;
     bool frange = false;
 
     ResizeHandle fResizeHandle;
@@ -149,6 +149,8 @@ protected:
                 speedstep = 0.1f;
         }
 
+        if(fspeed > 2.0f)
+            frange = true;
 
         ImGui::PushFont(titleBarFont);
         if (ImGui::Begin("WSTD FLANGR", nullptr, ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse))
@@ -181,7 +183,6 @@ protected:
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
                 if (not frange)
                 {
-                    fspeed = std::min(fspeed, 2.0f);
                     if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 2.0f, speedstep, "%.3fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
                     {
                         if (ImGui::IsItemActivated())
@@ -228,7 +229,7 @@ protected:
                         rangedef = "high";
 
                     ImVec2 rangedefSize = ImGui::CalcTextSize(rangedef);
-                    auto defmargin = (20.0f - rangedefSize.y)/ 2.0f;
+                    auto defmargin = ((10.0f * getScaleFactor()) - rangedefSize.y)/ 2.0f;
 
                     ImGui::Dummy(ImVec2(defmargin, 0.0f) * getScaleFactor()); ImGui::SameLine();
                     ImGui::Text(rangedef);
@@ -246,7 +247,15 @@ protected:
                     // active colors
                     ImGui::PushStyleColor(ImGuiCol_Button,          (ImVec4)RangeAct);
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)RangeActHovered);
-                    ImGui::Toggle("##Range", &frange, ImGuiToggleFlags_Animated);
+                    if (ImGui::Toggle("##Range", &frange, ImGuiToggleFlags_Animated))
+                    {
+                        if (ImGui::IsItemActivated() && !frange)
+                        {
+                            editParameter(3, true);
+                            fspeed = std::min(fspeed, 2.0f);
+                            setParameterValue(3, fspeed);
+                        }
+                    }
                     ImGui::PopStyleColor(5);
                 }
                 ImGui::EndGroup();
