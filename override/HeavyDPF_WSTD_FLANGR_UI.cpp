@@ -17,6 +17,7 @@ class ImGuiPluginUI : public UI
     float fintensity = 20.0f;
     float fmix = 50.0f;
     float fspeed = 20.0f;
+    bool frange = false;
 
     ResizeHandle fResizeHandle;
 
@@ -43,6 +44,7 @@ public:
 
         io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 16.0f * getScaleFactor(), &fc);
         io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 21.0f * getScaleFactor(), &fc);
+        io.Fonts->AddFontFromMemoryCompressedTTF((void*)veramobd_compressed_data, veramobd_compressed_size, 11.0f * getScaleFactor(), &fc);
         io.Fonts->Build();
         io.FontDefault = io.Fonts->Fonts[1];
 
@@ -109,19 +111,43 @@ protected:
         ImGuiIO& io(ImGui::GetIO());
         ImFont* defaultFont = ImGui::GetFont();
         ImFont* titleBarFont = io.Fonts->Fonts[2];
+        ImFont* smallFont = io.Fonts->Fonts[3];
 
         auto intense = (fintensity - 20.0f) / 5.0f;
 
-        auto IntensityActive = ColorBright(Red, intense);
+        auto IntensityActive  = ColorBright(Red, intense);
         auto IntensityHovered = ColorBright(RedBr, intense);
-        auto SpeedActive = ColorBright(Green, intense);
-        auto SpeedHovered = ColorBright(GreenBr, intense);
-        auto FeedbackActive = ColorBright(Blue, intense);
-        auto FeedbackHovered = ColorBright(BlueBr, intense);
-        auto MixActive = ColorMix(SpeedActive, Yellow, intense, fmix);
-        auto MixHovered = ColorMix(SpeedHovered, YellowBr, intense, fmix);
+        auto SpeedActive      = ColorBright(Green, intense);
+        auto SpeedHovered     = ColorBright(GreenBr, intense);
+        auto RangeSw          = ColorBright(WhiteDr, intense);
+        auto RangeAct         = ColorBright(GreenDr, intense);
+        auto RangeActHovered  = ColorBright(Green, intense);
+        auto FeedbackActive   = ColorBright(Blue, intense);
+        auto FeedbackHovered  = ColorBright(BlueBr, intense);
+        auto MixActive        = ColorMix(SpeedActive, Yellow, intense, fmix);
+        auto MixHovered       = ColorMix(SpeedHovered, YellowBr, intense, fmix);
 
         const float hundred = 100 * getScaleFactor();
+
+        auto speedstep = 1.0f;
+        auto perc = 1.0f;
+
+        if (io.KeyShift)
+        {
+            if (not frange)
+                speedstep = 0.001f;
+            else
+                speedstep = 0.01f;
+
+            perc = 0.1f;
+        }
+        else
+        {
+            if (not frange)
+                speedstep = 0.01f;
+            else
+                speedstep = 0.1f;
+        }
 
 
         ImGui::PushFont(titleBarFont);
@@ -135,7 +161,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)IntensityActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)IntensityHovered);
-            if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -149,25 +175,89 @@ protected:
             ImGui::PopStyleColor(2);
             ImGui::SameLine();
 
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)SpeedActive);
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
-            if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, 0.05f, "%.1fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 21))
+            ImGui::BeginGroup();
             {
-                if (ImGui::IsItemActivated())
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)SpeedActive);
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
+                if (not frange)
                 {
-                    editParameter(3, true);
-                    if (ImGui::IsMouseDoubleClicked(0))
-                        fspeed = 2.0f;
+                    fspeed = std::min(fspeed, 2.0f);
+                    if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 2.0f, speedstep, "%.3fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+                    {
+                        if (ImGui::IsItemActivated())
+                        {
+                            editParameter(3, true);
+                            if (ImGui::IsMouseDoubleClicked(0))
+                                fspeed = 2.0f;
 
+                        }
+                        setParameterValue(3, fspeed);
+                    }
                 }
-                setParameterValue(3, fspeed);
+
+                if (frange)
+                {
+                    if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, speedstep, "%.3fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 21))
+                    {
+                        if (ImGui::IsItemActivated())
+                        {
+                            editParameter(3, true);
+                            if (ImGui::IsMouseDoubleClicked(0))
+                                fspeed = 2.0f;
+
+                        }
+                        setParameterValue(3, fspeed);
+                    }
+                }
+                ImGui::PopStyleColor(2);
+                ImGui::SameLine();
+
+                auto rangestring = "Range";
+                ImGui::BeginGroup();
+                {
+                    // Title text
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.85f, 0.85f, 0.85f, 0.85f));
+                    ImGui::Text(rangestring);
+
+                    ImGui::Dummy(ImVec2(0.0f, 20.0f) * getScaleFactor());
+
+                    // Range text
+                    ImGui::PushFont(smallFont);
+                    auto rangedef = "low";
+                    if (frange)
+                        rangedef = "high";
+
+                    ImVec2 rangedefSize = ImGui::CalcTextSize(rangedef);
+                    auto defmargin = (20.0f - rangedefSize.y)/ 2.0f;
+
+                    ImGui::Dummy(ImVec2(defmargin, 0.0f) * getScaleFactor()); ImGui::SameLine();
+                    ImGui::Text(rangedef);
+                    ImGui::PushFont(defaultFont);
+
+                    ImGui::PopStyleColor();
+
+                    // knob
+                    ImGui::PushStyleColor(ImGuiCol_Text,            (ImVec4)RangeSw);
+
+                    // inactive colors
+                    ImGui::PushStyleColor(ImGuiCol_FrameBg,         (ImVec4)RangeAct);
+                    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered,  (ImVec4)RangeActHovered);
+
+                    // active colors
+                    ImGui::PushStyleColor(ImGuiCol_Button,          (ImVec4)RangeAct);
+                    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)RangeActHovered);
+                    ImGui::Toggle("##Range", &frange, ImGuiToggleFlags_Animated);
+                    ImGui::PopStyleColor(5);
+                }
+                ImGui::EndGroup();
+
             }
-            ImGui::PopStyleColor(2);
+            ImGui::EndGroup();
             ImGui::SameLine();
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)FeedbackActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)FeedbackHovered);
-            if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SpaceBipolar, hundred, ImGuiKnob_Flags))
+            if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SpaceBipolar, hundred, ImGuiKnob_Flags))
             {
                 if (ImGui::IsItemActivated())
                 {
@@ -183,7 +273,7 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)MixActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)MixHovered);
-            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, 1.0f, "%.0f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
