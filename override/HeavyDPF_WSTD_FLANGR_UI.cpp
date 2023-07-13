@@ -134,19 +134,12 @@ protected:
 
         if (io.KeyShift)
         {
-            if (not frange)
-                speedstep = 0.001f;
-            else
-                speedstep = 0.01f;
-
+            speedstep = (frange) ? 0.01f : 0.001f;
             perc = 0.1f;
         }
         else
         {
-            if (not frange)
-                speedstep = 0.01f;
-            else
-                speedstep = 0.1f;
+            speedstep = (frange) ? 0.1f : 0.01f;
         }
 
         if(fspeed > 2.0f)
