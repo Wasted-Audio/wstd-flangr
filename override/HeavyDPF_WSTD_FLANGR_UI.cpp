@@ -104,9 +104,8 @@ protected:
         ImGuiStyle& style = ImGui::GetStyle();
         style.WindowTitleAlign = ImVec2(0.5f, 0.5f);
 
-
-        style.Colors[ImGuiCol_TitleBgActive] = (ImVec4)ImColor::HSV(3.31f / 3.6f, 0.64f, 0.40f);
-        style.Colors[ImGuiCol_WindowBg] = (ImVec4)ImColor::HSV(3.31f / 3.6f, 0.64f, 0.10f);
+        style.Colors[ImGuiCol_TitleBgActive] = (ImVec4)WstdTitleBgActive;
+        style.Colors[ImGuiCol_WindowBg] = (ImVec4)WstdWindowBg;
 
         ImGuiIO& io(ImGui::GetIO());
         ImFont* defaultFont = ImGui::GetFont();
@@ -127,15 +126,17 @@ protected:
         auto MixActive        = ColorMix(SpeedActive, Yellow, intense, fmix);
         auto MixHovered       = ColorMix(SpeedHovered, YellowBr, intense, fmix);
 
-        const float hundred = 100 * getScaleFactor();
+        auto scaleFactor = getScaleFactor();
+        const float hundred = 100 * scaleFactor;
+        const float toggleWidth  = 20 * scaleFactor;
 
         auto speedstep = 1.0f;
-        auto perc = 1.0f;
+        auto percstep = 1.0f;
 
         if (io.KeyShift)
         {
             speedstep = (frange) ? 0.01f : 0.001f;
-            perc = 0.1f;
+            percstep = 0.1f;
         }
         else
         {
@@ -148,22 +149,20 @@ protected:
         ImGui::PushFont(titleBarFont);
         if (ImGui::Begin("WSTD FLANGR", nullptr, ImGuiWindowFlags_NoResize + ImGuiWindowFlags_NoCollapse))
         {
-            ImGui::Dummy(ImVec2(0.0f, 8.0f * getScaleFactor()));
+            ImGui::Dummy(ImVec2(0.0f, 8.0f * scaleFactor));
             ImGui::PushFont(defaultFont);
             auto ImGuiKnob_Flags = ImGuiKnobFlags_DoubleClickReset + ImGuiKnobFlags_ValueTooltip + ImGuiKnobFlags_NoInput + ImGuiKnobFlags_ValueTooltipHideOnClick;
             auto ImGuiKnob_FlagsDB = ImGuiKnob_Flags + ImGuiKnobFlags_dB;
-            auto ImGuiKnob_FlagsLog = ImGuiKnob_Flags + ImGuiKnobFlags_Logarithmic;
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)IntensityActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)IntensityHovered);
-            if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Intensity", &fintensity, 0.0f, 100.0f, percstep, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
                     editParameter(1, true);
                     if (ImGui::IsMouseDoubleClicked(0))
                         fintensity = 20.0f;
-
                 }
                 setParameterValue(1, fintensity);
             }
@@ -174,60 +173,39 @@ protected:
             {
                 ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)SpeedActive);
                 ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)SpeedHovered);
+                auto flow_max = 20.0f;
+                auto flow_steps = 21;
                 if (not frange)
                 {
-                    if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 2.0f, speedstep, "%.3fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
-                    {
-                        if (ImGui::IsItemActivated())
-                        {
-                            editParameter(3, true);
-                            if (ImGui::IsMouseDoubleClicked(0))
-                                fspeed = 2.0f;
-
-                        }
-                        setParameterValue(3, fspeed);
-                    }
+                    flow_max = 2.0f;
+                    flow_steps = 11;
                 }
 
-                if (frange)
+                if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, flow_max, speedstep, "%.3fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, flow_steps))
                 {
-                    if (ImGuiKnobs::Knob("Speed", &fspeed, 0.0f, 20.0f, speedstep, "%.3fHz", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 21))
+                    if (ImGui::IsItemActivated())
                     {
-                        if (ImGui::IsItemActivated())
-                        {
-                            editParameter(3, true);
-                            if (ImGui::IsMouseDoubleClicked(0))
-                                fspeed = 2.0f;
-
-                        }
-                        setParameterValue(3, fspeed);
+                        editParameter(3, true);
+                        if (ImGui::IsMouseDoubleClicked(0))
+                            fspeed = 2.0f;
                     }
+                    setParameterValue(3, fspeed);
                 }
                 ImGui::PopStyleColor(2);
                 ImGui::SameLine();
 
-                auto rangestring = "Range";
                 ImGui::BeginGroup();
                 {
                     // Title text
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.85f, 0.85f, 0.85f, 0.85f));
-                    ImGui::Text(rangestring);
-
-                    ImGui::Dummy(ImVec2(0.0f, 20.0f) * getScaleFactor());
+                    ImGui::PushStyleColor(ImGuiCol_Text, TextClr);
+                    CenterTextX("Range", toggleWidth);
+                    ImGui::Dummy(ImVec2(0.0f, 20.0f) * scaleFactor);
 
                     // Range text
                     ImGui::PushFont(smallFont);
-                    auto rangedef = "low";
-                    if (frange)
-                        rangedef = "high";
-
-                    ImVec2 rangedefSize = ImGui::CalcTextSize(rangedef);
-                    auto defmargin = ((10.0f * getScaleFactor()) - rangedefSize.y)/ 2.0f;
-
-                    ImGui::Dummy(ImVec2(defmargin, 0.0f) * getScaleFactor()); ImGui::SameLine();
-                    ImGui::Text(rangedef);
+                    auto rangedef = (frange) ? "fast": "slow";
+                    CenterTextX(rangedef, toggleWidth);
                     ImGui::PushFont(defaultFont);
-
                     ImGui::PopStyleColor();
 
                     // knob
@@ -240,6 +218,7 @@ protected:
                     // active colors
                     ImGui::PushStyleColor(ImGuiCol_Button,          (ImVec4)RangeAct);
                     ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)RangeActHovered);
+
                     if (ImGui::Toggle("##Range", &frange, ImGuiToggleFlags_Animated))
                     {
                         if (ImGui::IsItemActivated() && !frange)
@@ -252,21 +231,19 @@ protected:
                     ImGui::PopStyleColor(5);
                 }
                 ImGui::EndGroup();
-
             }
             ImGui::EndGroup();
             ImGui::SameLine();
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)FeedbackActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)FeedbackHovered);
-            if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SpaceBipolar, hundred, ImGuiKnob_Flags))
+            if (ImGuiKnobs::Knob("Feedback", &ffeedback, -100.0f, 100.0f, percstep, "%.1f%%", ImGuiKnobVariant_SpaceBipolar, hundred, ImGuiKnob_Flags))
             {
                 if (ImGui::IsItemActivated())
                 {
                     editParameter(0, true);
                     if (ImGui::IsMouseDoubleClicked(0))
                         ffeedback = 0.0f;
-
                 }
                 setParameterValue(0, ffeedback);
             }
@@ -275,14 +252,13 @@ protected:
 
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,    (ImVec4)MixActive);
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,   (ImVec4)MixHovered);
-            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, perc, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
+            if (ImGuiKnobs::Knob("Mix", &fmix, 0.0f, 100.0f, percstep, "%.1f%%", ImGuiKnobVariant_SteppedTick, hundred, ImGuiKnob_Flags, 11))
             {
                 if (ImGui::IsItemActivated())
                 {
                     editParameter(2, true);
                     if (ImGui::IsMouseDoubleClicked(0))
                         fmix = 50.0f;
-
                 }
                 setParameterValue(2, fmix);
             }
@@ -291,11 +267,10 @@ protected:
 
             if (ImGui::IsItemDeactivated())
             {
-            editParameter(0, false);
-            editParameter(1, false);
-            editParameter(2, false);
-            editParameter(3, false);
-
+                editParameter(0, false);
+                editParameter(1, false);
+                editParameter(2, false);
+                editParameter(3, false);
             }
         }
         ImGui::End();
