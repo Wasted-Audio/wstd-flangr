@@ -8,7 +8,7 @@
         "enable_ui": true,
         "enable_modgui": true,
         "ui_size": {
-            "width": 440,
+            "width": 500,
             "height": 180
         },
         "midi_input": 0,
