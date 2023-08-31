@@ -8,12 +8,12 @@
         "enable_ui": true,
         "enable_modgui": true,
         "ui_size": {
-            "width": 500,
+            "width": 484,
             "height": 180
         },
         "midi_input": 0,
         "midi_output": 0,
-        "version": "0, 2, 1",
+        "version": "1, 0, 0",
         "license": "GPL-3.0-or-later",
         "homepage": "https://wasted.audio/software/wstd_flangr",
         "plugin_uri": "https://wasted.audio/software/wstd_flangr",
@@ -22,8 +22,7 @@
             "lv2_sep",
             "vst2",
             "vst3",
-            "clap",
-            "jack"
+            "clap"
         ],
         "lv2_info": "lv2:FlangerPlugin",
         "vst3_info": "Fx|Modulation|Stereo",
