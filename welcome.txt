@@ -1,0 +1,7 @@
+@name@
+
+This is our simple flanger effect plugin. It is very easy to use, with only a few controls. However the range of sounds can get pretty wide.
+
+LFO speed range goes from 0 up to 20Hz and feedback can modulate between positive and negative flanging.
+
+Like all our other software this plugin is without DRM and Opensource.
