@@ -14,6 +14,13 @@ START_NAMESPACE_DISTRHO
 
 // --------------------------------------------------------------------------------------------------------------------
 
+enum HeavyParams {
+    FEEDBACK,
+    INTENSITY,
+    MIX,
+    SPEED
+};
+
 class ImGuiPluginUI : public UI
 {
     float ffeedback = 0.0f;
@@ -58,19 +65,19 @@ protected:
     void parameterChanged(uint32_t index, float value) override
     {
         switch (index) {
-            case 0: {
+            case FEEDBACK: {
                 ffeedback = value;
                 break;
             }
-            case 1: {
+            case INTENSITY: {
                 fintensity = value;
                 break;
             }
-            case 2: {
+            case MIX: {
                 fmix = value;
                 break;
             }
-            case 3: {
+            case SPEED: {
                 fspeed = value;
                 break;
             }
@@ -179,11 +186,11 @@ protected:
             {
                 if (ImGui::IsItemActivated())
                 {
-                    editParameter(1, true);
+                    editParameter(INTENSITY, true);
                     if (ImGui::IsMouseDoubleClicked(0))
                         fintensity = 20.0f;
                 }
-                setParameterValue(1, fintensity);
+                setParameterValue(INTENSITY, fintensity);
             }
             ImGui::PopStyleColor(2);
             ImGui::SameLine();
@@ -204,11 +211,11 @@ protected:
                 {
                     if (ImGui::IsItemActivated())
                     {
-                        editParameter(3, true);
+                        editParameter(SPEED, true);
                         if (ImGui::IsMouseDoubleClicked(0))
                             fspeed = 2.0f;
                     }
-                    setParameterValue(3, fspeed);
+                    setParameterValue(SPEED, fspeed);
                 }
                 ImGui::PopStyleColor(2);
                 ImGui::SameLine();
@@ -243,9 +250,9 @@ protected:
                     {
                         if (ImGui::IsItemActivated() && !frange)
                         {
-                            editParameter(3, true);
+                            editParameter(SPEED, true);
                             fspeed = std::min(fspeed, 2.0f);
-                            setParameterValue(3, fspeed);
+                            setParameterValue(SPEED, fspeed);
                         }
                     }
                     ImGui::PopStyleColor(5);
@@ -262,11 +269,11 @@ protected:
             {
                 if (ImGui::IsItemActivated())
                 {
-                    editParameter(0, true);
+                    editParameter(FEEDBACK, true);
                     if (ImGui::IsMouseDoubleClicked(0))
                         ffeedback = 0.0f;
                 }
-                setParameterValue(0, ffeedback);
+                setParameterValue(FEEDBACK, ffeedback);
             }
             ImGui::PopStyleColor(2);
             ImGui::SameLine();
@@ -277,21 +284,21 @@ protected:
             {
                 if (ImGui::IsItemActivated())
                 {
-                    editParameter(2, true);
+                    editParameter(MIX, true);
                     if (ImGui::IsMouseDoubleClicked(0))
                         fmix = 50.0f;
                 }
-                setParameterValue(2, fmix);
+                setParameterValue(MIX, fmix);
             }
             ImGui::PopStyleColor(2);
             ImGui::SameLine();
 
             if (ImGui::IsItemDeactivated())
             {
-                editParameter(0, false);
-                editParameter(1, false);
-                editParameter(2, false);
-                editParameter(3, false);
+                editParameter(FEEDBACK, false);
+                editParameter(INTENSITY, false);
+                editParameter(MIX, false);
+                editParameter(SPEED, false);
             }
             ImGui::PopFont();
         }
