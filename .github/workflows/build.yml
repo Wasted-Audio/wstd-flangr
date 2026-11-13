@@ -61,7 +61,7 @@ jobs:
     strategy:
       matrix:
         target: [macos-intel, macos-universal]
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -71,31 +71,62 @@ jobs:
         with:
             pip-conf: "[global]\nbreak-system-packages = true"
 
-      - name: Import APP Certificates
-        uses: apple-actions/import-codesign-certs@v2
-        with:
-          keychain-password : ${{ secrets.MACOS_KEYCHAIN_PASS }}
-          p12-file-base64: ${{ secrets.MACOS_APP_DEV_P12 }}
-          p12-password: ${{ secrets.MACOS_APP_DEV_PASS }}
-
-      - name: Import INST Certificates
-        uses: apple-actions/import-codesign-certs@v2
-        with:
-          keychain-password : ${{ secrets.MACOS_KEYCHAIN_PASS }}
-          create-keychain : false
-          p12-file-base64: ${{ secrets.MACOS_INSTALLER_DEV_P12 }}
-          p12-password: ${{ secrets.MACOS_INSTALLER_DEV_PASS }}
-
       - uses: distrho/dpf-makefile-action@v1
         env:
           MACOS_PKG_NAME: "WSTD-FLANGR"
           MACOS_PKG_LICENSE_FILE: "${{ github.workspace }}/LICENSE"
           MACOS_PKG_WELCOME_TXT: "${{ github.workspace }}/welcome.txt"
-          MACOS_APP_DEV_ID: ${{ secrets.MACOS_APP_DEV_ID }}
-          MACOS_INSTALLER_DEV_ID: ${{ secrets.MACOS_INSTALLER_DEV_ID }}
+          MACOS_APP_CERTIFICATE: ${{ secrets.MACOS_APP_CERTIFICATE }}
+          MACOS_INSTALLER_CERTIFICATE: ${{ secrets.MACOS_INSTALLER_CERTIFICATE }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
           MACOS_NOTARIZATION_USER: ${{ secrets.MACOS_NOTARIZATION_USER }}
           MACOS_NOTARIZATION_PASS: ${{ secrets.MACOS_NOTARIZATION_PASS }}
           MACOS_NOTARIZATION_TEAM: ${{ secrets.MACOS_NOTARIZATION_TEAM }}
+        with:
+          target: ${{ matrix.target }}
+          hvcc: True
+          dpf_path: 'dep/dpf'
+
+  akai:
+    strategy:
+      matrix:
+        target: [linux-arm64, linux-armhf]
+    runs-on: ubuntu-latest
+    env:
+      SKIP_OVERRIDE: "1"
+    container:
+      image: ubuntu:20.04
+    steps:
+      - name: Install git
+        run: |
+          apt-get update -qq && apt-get install -yqq --no-install-recommends ca-certificates curl git openssl
+          curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git_2.34.1-1ubuntu1~bpo20.04.1~ppa1_amd64.deb
+          curl -sLO https://launchpad.net/~kxstudio-debian/+archive/ubuntu/toolchain/+files/git-man_2.34.1-1ubuntu1~bpo20.04.1~ppa1_all.deb
+          dpkg -i *.deb
+          rm *.deb
+      - name: Install and use python3.9
+        run: |
+            apt-get install -yqq python3 python3.9
+            update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
+      - name: Install pip
+        run: apt-get install -yqq --no-install-recommends python3-pip
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: innodatalabs/action-pip-conf@1.0.0
+        with:
+            pip-conf: "[global]\nbreak-system-packages = true"
+
+      - name: 'Setup jq'
+        uses: dcarbone/install-jq-action@v3
+
+      - name: Adjust json
+        run: |
+          echo $(cat WSTD_FLANGR.json | jq '.|.dpf.plugin_formats=["vst2"]' | jq '.|.dpf.enable_ui=false') > WSTD_FLANGR.json
+
+      - uses: distrho/dpf-makefile-action@v1
         with:
           target: ${{ matrix.target }}
           hvcc: True

@@ -16,4 +16,4 @@ pregen: $(PREGEN)
 
 %/plugin/source: %.json %.pd override/*.*
 	hvcc $*.pd -m $*.json -n $* -o $* -g dpf -p dep/heavylib/ dep/ --copyright "Copyright (c) Wasted Audio 2023 - GPL-3.0-or-later"
-	cp override/*.* $*/plugin/source/
+	@if [ -Z "$(SKIP_OVERRIDE)"]; then cp override/*.* $*/plugin/source/; fi
