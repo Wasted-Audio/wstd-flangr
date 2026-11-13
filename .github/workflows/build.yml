@@ -71,21 +71,6 @@ jobs:
         with:
             pip-conf: "[global]\nbreak-system-packages = true"
 
-      - name: Import APP Certificates
-        uses: apple-actions/import-codesign-certs@v2
-        with:
-          keychain-password : ${{ secrets.MACOS_KEYCHAIN_PASS }}
-          p12-file-base64: ${{ secrets.MACOS_APP_DEV_P12 }}
-          p12-password: ${{ secrets.MACOS_APP_DEV_PASS }}
-
-      - name: Import INST Certificates
-        uses: apple-actions/import-codesign-certs@v2
-        with:
-          keychain-password : ${{ secrets.MACOS_KEYCHAIN_PASS }}
-          create-keychain : false
-          p12-file-base64: ${{ secrets.MACOS_INSTALLER_DEV_P12 }}
-          p12-password: ${{ secrets.MACOS_INSTALLER_DEV_PASS }}
-
       - uses: distrho/dpf-makefile-action@v1
         env:
           MACOS_PKG_NAME: "WSTD-FLANGR"
