@@ -92,6 +92,8 @@ jobs:
       matrix:
         target: [linux-arm64, linux-armhf]
     runs-on: ubuntu-latest
+    env:
+      SKIP_OVERRIDE: "1"
     container:
       image: ubuntu:20.04
     steps:
