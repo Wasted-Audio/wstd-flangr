@@ -123,7 +123,6 @@ jobs:
       - name: Adjust json
         run: |
           echo $(cat WSTD_FLANGR.json | jq '.|.dpf.plugin_formats=["vst2"]' | jq '.|.dpf.enable_ui=false') > WSTD_FLANGR.json
-          rm -r override
 
       - uses: distrho/dpf-makefile-action@v1
         with:
